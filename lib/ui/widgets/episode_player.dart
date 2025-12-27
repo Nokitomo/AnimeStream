@@ -156,7 +156,7 @@ class _EpisodePlayerState extends State<EpisodePlayer> {
     );
     setState(() {});
 
-    Uri url = Uri.parse("https://www.animeunity.it/anime/${anime.id}-${anime.slug}/${anime.episodes[index]['id']}");
+    Uri url = Uri.parse("https://www.animeunity.so/anime/${anime.id}-${anime.slug}/${anime.episodes[index]['id']}");
     await theController.loadRequest(url);
   }
 

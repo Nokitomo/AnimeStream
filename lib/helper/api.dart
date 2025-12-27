@@ -13,12 +13,30 @@ import 'package:get/get.dart';
 Box objBox = Get.find<ObjectBox>().store.box<AnimeModel>();
 InternalAPI internalAPI = Get.find<InternalAPI>();
 
+const String _baseHost = "https://www.animeunity.so";
+const String _baseHostNoWww = "https://animeunity.so";
+const Map<String, String> _defaultHeaders = {
+  "Accept": "application/json",
+  "User-Agent":
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+};
+
 Future<Document> makeRequestAndGetDocument(String url) async {
-  var response = await http.get(
-    Uri.parse(url),
-    headers: {"Accept": "application/json"},
-  );
-  return parse(response.body);
+  try {
+    final response = await http.get(
+      Uri.parse(url),
+      headers: _defaultHeaders,
+    );
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception("HTTP ${response.statusCode} for $url");
+    }
+    if (response.body.trim().isEmpty) {
+      throw Exception("Empty response for $url");
+    }
+    return parse(response.body);
+  } catch (e) {
+    throw Exception("Request failed for $url: $e");
+  }
 }
 
 Future<List<Element>> getElements(
@@ -26,59 +44,63 @@ Future<List<Element>> getElements(
   int maxTry = 10,
   required String url,
 }) async {
-  Document document = await makeRequestAndGetDocument(url);
-  List<Element> elements = document.getElementsByTagName(tagName);
-  int i = 0;
-  while (elements.isEmpty && i < maxTry) {
-    document = await makeRequestAndGetDocument(url);
-    elements = document.getElementsByTagName(tagName);
-    i++;
+  try {
+    Document document = await makeRequestAndGetDocument(url);
+    List<Element> elements = document.getElementsByTagName(tagName);
+    int i = 0;
+    while (elements.isEmpty && i < maxTry) {
+      document = await makeRequestAndGetDocument(url);
+      elements = document.getElementsByTagName(tagName);
+      i++;
+    }
+    if (elements.isEmpty) {
+      throw Exception("No <$tagName> elements found at $url");
+    }
+    return elements;
+  } catch (e) {
+    throw Exception("Failed to load elements from $url: $e");
   }
-  return elements;
 }
 
 Future<List> latestAnime() async {
   List<Element> elements = await getElements(
     'layout-items',
-    url: "https://animeunity.it/",
+    url: "$_baseHostNoWww/",
   );
 
-  if (elements.isEmpty) {
-    throw Exception("No elements found");
-  }
-
   var data = elements[0].attributes['items-json'];
-  var json = jsonDecode(data!);
+  if (data == null || data.isEmpty) {
+    throw Exception("Missing items-json attribute");
+  }
+  var json = jsonDecode(data);
   return json['data'];
 }
 
 Future<List> popularAnime() async {
   List<Element> elements = await getElements(
     'top-anime',
-    url: "https://www.animeunity.it/top-anime?popular=true",
+    url: "$_baseHost/top-anime?popular=true",
   );
 
-  if (elements.isEmpty) {
-    return [];
-  }
-
   var data = elements[0].attributes['animes'];
-  var json = jsonDecode(data!);
+  if (data == null || data.isEmpty) {
+    throw Exception("Missing animes attribute");
+  }
+  var json = jsonDecode(data);
   return json['data'];
 }
 
 Future<List> searchAnime({String title = ""}) async {
   List<Element> elements = await getElements(
     'archivio',
-    url: "https://animeunity.it/archivio?title=$title",
+    url: "$_baseHostNoWww/archivio?title=$title",
   );
 
-  if (elements.isEmpty) {
-    return [];
-  }
-
   var data = elements[0].attributes['records'];
-  var json = jsonDecode(data!);
+  if (data == null || data.isEmpty) {
+    throw Exception("Missing records attribute");
+  }
+  var json = jsonDecode(data);
   return json;
 }
 
