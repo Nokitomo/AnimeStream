@@ -443,10 +443,9 @@ packages:
   fluttertoast:
     dependency: "direct main"
     description:
-      name: fluttertoast
-      sha256: dfdde255317af381bfc1c486ed968d5a43a2ded9c931e87cbecd88767d6a71c1
-      url: "https://pub.dev"
-    source: hosted
+      path: "third_party/fluttertoast"
+      relative: true
+    source: path
     version: "8.2.4"
   frontend_server_client:
     dependency: transitive
@@ -467,10 +466,9 @@ packages:
   fvp:
     dependency: "direct overridden"
     description:
-      name: fvp
-      sha256: fc8a987ec65dbdb5b08c7eab3e6ccad164931686bee0f8844975146db5e5dd37
-      url: "https://pub.dev"
-    source: hosted
+      path: "third_party/fvp"
+      relative: true
+    source: path
     version: "0.2.0"
   get:
     dependency: "direct main"
@@ -683,10 +681,9 @@ packages:
   ota_update:
     dependency: "direct main"
     description:
-      name: ota_update
-      sha256: "8c47531b655f8fcf9961dc7758a933a9ccbcbe1c77a7ec52e5c5cfc2ec367ba7"
-      url: "https://pub.dev"
-    source: hosted
+      path: "third_party/ota_update"
+      relative: true
+    source: path
     version: "6.0.0"
   package_config:
     dependency: transitive
@@ -729,12 +726,11 @@ packages:
     source: hosted
     version: "2.1.2"
   path_provider_android:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: path_provider_android
-      sha256: "477184d672607c0a3bf68fbbf601805f92ef79c82b64b4d6eb318cbca4c48668"
-      url: "https://pub.dev"
-    source: hosted
+      path: "third_party/path_provider_android"
+      relative: true
+    source: path
     version: "2.2.2"
   path_provider_foundation:
     dependency: transitive
@@ -777,12 +773,11 @@ packages:
     source: hosted
     version: "11.3.1"
   permission_handler_android:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: permission_handler_android
-      sha256: "1acac6bae58144b442f11e66621c062aead9c99841093c38f5bcdcc24c1c3474"
-      url: "https://pub.dev"
-    source: hosted
+      path: "third_party/permission_handler_android"
+      relative: true
+    source: path
     version: "12.0.5"
   permission_handler_apple:
     dependency: transitive
@@ -937,12 +932,11 @@ packages:
     source: hosted
     version: "2.2.2"
   shared_preferences_android:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: shared_preferences_android
-      sha256: "8568a389334b6e83415b6aae55378e158fbc2314e074983362d20c562780fb06"
-      url: "https://pub.dev"
-    source: hosted
+      path: "third_party/shared_preferences_android"
+      relative: true
+    source: path
     version: "2.2.1"
   shared_preferences_foundation:
     dependency: transitive
@@ -1030,12 +1024,11 @@ packages:
     source: hosted
     version: "7.0.0"
   sqflite:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: sqflite
-      sha256: a9016f495c927cb90557c909ff26a6d92d9bd54fc42ba92e19d4e79d61e798c6
-      url: "https://pub.dev"
-    source: hosted
+      path: "third_party/sqflite"
+      relative: true
+    source: path
     version: "2.3.2"
   sqflite_common:
     dependency: transitive
@@ -1134,12 +1127,11 @@ packages:
     source: hosted
     version: "6.2.5"
   url_launcher_android:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: url_launcher_android
-      sha256: d4ed0711849dd8e33eb2dd69c25db0d0d3fdc37e0a62e629fe32f57a22db2745
-      url: "https://pub.dev"
-    source: hosted
+      path: "third_party/url_launcher_android"
+      relative: true
+    source: path
     version: "6.3.0"
   url_launcher_ios:
     dependency: "direct overridden"
@@ -1215,12 +1207,11 @@ packages:
     source: git
     version: "2.9.0"
   video_player_android:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: video_player_android
-      sha256: "4dd9b8b86d70d65eecf3dcabfcdfbb9c9115d244d022654aba49a00336d540c2"
-      url: "https://pub.dev"
-    source: hosted
+      path: "third_party/video_player_android"
+      relative: true
+    source: path
     version: "2.4.12"
   video_player_avfoundation:
     dependency: "direct overridden"
@@ -1313,12 +1304,11 @@ packages:
     source: hosted
     version: "4.7.0"
   webview_flutter_android:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: webview_flutter_android
-      sha256: f038ee2fae73b509dde1bc9d2c5a50ca92054282de17631a9a3d515883740934
-      url: "https://pub.dev"
-    source: hosted
+      path: "third_party/webview_flutter_android"
+      relative: true
+    source: path
     version: "3.16.0"
   webview_flutter_platform_interface:
     dependency: transitive

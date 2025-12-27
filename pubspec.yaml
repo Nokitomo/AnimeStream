@@ -55,16 +55,35 @@ dependencies:
 dependency_overrides:
   archive:
     path: ./third_party/archive
-  fvp: 0.2.0
+  fvp:
+    path: ./third_party/fvp
   auto_orientation:
     path: ./third_party/auto_orientation
   flutter_meedu_videoplayer:
     path: ./third_party/flutter_meedu_videoplayer
   flutter_video_cast:
     path: ./third_party/flutter_video_cast
+  fluttertoast:
+    path: ./third_party/fluttertoast
   flutter_plugin_android_lifecycle: ^2.0.23
   file_picker:
     path: ./third_party/file_picker
+  path_provider_android:
+    path: ./third_party/path_provider_android
+  permission_handler_android:
+    path: ./third_party/permission_handler_android
+  shared_preferences_android:
+    path: ./third_party/shared_preferences_android
+  sqflite:
+    path: ./third_party/sqflite
+  url_launcher_android:
+    path: ./third_party/url_launcher_android
+  video_player_android:
+    path: ./third_party/video_player_android
+  webview_flutter_android:
+    path: ./third_party/webview_flutter_android
+  ota_update:
+    path: ./third_party/ota_update
   video_player_avfoundation:
     git:
       url: https://github.com/vanlooverenkoen/flutter-packages/

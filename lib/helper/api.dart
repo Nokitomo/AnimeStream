@@ -21,6 +21,66 @@ const Map<String, String> _defaultHeaders = {
       "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
 };
 
+class _AnimeunitySession {
+  final String? xsrfToken;
+  final String? session;
+
+  const _AnimeunitySession({required this.xsrfToken, required this.session});
+
+  String get cookieHeader {
+    final parts = <String>[];
+    if (xsrfToken != null && xsrfToken!.isNotEmpty) {
+      parts.add("XSRF-TOKEN=$xsrfToken");
+    }
+    if (session != null && session!.isNotEmpty) {
+      parts.add("animeunity_session=$session");
+    }
+    return parts.join("; ");
+  }
+}
+
+String? _extractCookieValue(String raw, String name) {
+  final match = RegExp("$name=([^;]+)").firstMatch(raw);
+  return match?.group(1);
+}
+
+Future<_AnimeunitySession> _getAnimeunitySession() async {
+  try {
+    final response = await http.get(
+      Uri.parse("$_baseHost/"),
+      headers: _defaultHeaders,
+    );
+    final raw = response.headers['set-cookie'];
+    if (raw == null || raw.isEmpty) {
+      return const _AnimeunitySession(xsrfToken: null, session: null);
+    }
+    final xsrf = _extractCookieValue(raw, "XSRF-TOKEN");
+    final session = _extractCookieValue(raw, "animeunity_session");
+    return _AnimeunitySession(
+      xsrfToken: xsrf != null ? Uri.decodeComponent(xsrf) : null,
+      session: session,
+    );
+  } catch (_) {
+    return const _AnimeunitySession(xsrfToken: null, session: null);
+  }
+}
+
+Map<String, String> _buildSessionHeaders(_AnimeunitySession session) {
+  final headers = <String, String>{
+    ..._defaultHeaders,
+    "Origin": _baseHost,
+    "Referer": "$_baseHost/",
+  };
+  if (session.xsrfToken != null && session.xsrfToken!.isNotEmpty) {
+    headers["X-XSRF-TOKEN"] = session.xsrfToken!;
+  }
+  final cookie = session.cookieHeader;
+  if (cookie.isNotEmpty) {
+    headers["Cookie"] = cookie;
+  }
+  return headers;
+}
+
 Future<Document> makeRequestAndGetDocument(String url) async {
   try {
     final response = await http.get(
@@ -91,17 +151,174 @@ Future<List> popularAnime() async {
 }
 
 Future<List> searchAnime({String title = ""}) async {
-  List<Element> elements = await getElements(
-    'archivio',
-    url: "$_baseHostNoWww/archivio?title=$title",
+  if (title.trim().isEmpty) {
+    return [];
+  }
+
+  final session = await _getAnimeunitySession();
+  final headers = _buildSessionHeaders(session);
+
+  final results = <dynamic>[];
+  final ids = <int>{};
+
+  try {
+    final response = await http.post(
+      Uri.parse("$_baseHost/livesearch"),
+      headers: {
+        ...headers,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: {
+        "title": title,
+      },
+    );
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final payload = jsonDecode(response.body);
+      if (payload is Map && payload["records"] is List) {
+        for (final record in payload["records"]) {
+          if (record is Map && record["id"] is int) {
+            if (ids.add(record["id"])) {
+              results.add(record);
+            }
+          }
+        }
+      }
+    }
+  } catch (_) {
+    // Ignore to try the second search endpoint.
+  }
+
+  try {
+    final payload = {
+      "title": title,
+      "type": false,
+      "year": false,
+      "order": false,
+      "status": false,
+      "genres": false,
+      "offset": 0,
+      "dubbed": false,
+      "season": false,
+    };
+
+    final response = await http.post(
+      Uri.parse("$_baseHost/archivio/get-animes"),
+      headers: {
+        ...headers,
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode(payload),
+    );
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final payload = jsonDecode(response.body);
+      if (payload is Map && payload["records"] is List) {
+        for (final record in payload["records"]) {
+          if (record is Map && record["id"] is int) {
+            if (ids.add(record["id"])) {
+              results.add(record);
+            }
+          }
+        }
+      }
+    }
+  } catch (_) {
+    // ignore
+  }
+
+  return results;
+}
+
+Future<List> fetchAnimeEpisodes(int animeId) async {
+  final headers = {
+    ..._defaultHeaders,
+    "Referer": "$_baseHost/",
+  };
+
+  final infoResponse = await http.get(
+    Uri.parse("$_baseHost/info_api/$animeId/"),
+    headers: headers,
+  );
+  if (infoResponse.statusCode < 200 || infoResponse.statusCode >= 300) {
+    throw Exception("HTTP ${infoResponse.statusCode} for info_api");
+  }
+
+  final info = jsonDecode(infoResponse.body);
+  final totalCount = info is Map ? (info["episodes_count"] ?? 0) : 0;
+  if (totalCount == 0) {
+    return [];
+  }
+
+  final List episodes = [];
+  int start = 1;
+  while (start <= totalCount) {
+    final end = (start + 119) <= totalCount ? (start + 119) : totalCount;
+    final url = Uri.parse("$_baseHost/info_api/$animeId/1")
+        .replace(queryParameters: {
+      "start_range": start.toString(),
+      "end_range": end.toString(),
+    });
+
+    final response = await http.get(url, headers: headers);
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception("HTTP ${response.statusCode} for info_api range");
+    }
+    final data = jsonDecode(response.body);
+    if (data is Map && data["episodes"] is List) {
+      episodes.addAll(data["episodes"]);
+    }
+    start = end + 1;
+  }
+
+  return episodes;
+}
+
+String? _extractDownloadUrl(String html) {
+  final match = RegExp(r"window\.downloadUrl\s*=\s*'([^']+)'").firstMatch(html);
+  if (match != null) {
+    return match.group(1);
+  }
+  final alt = RegExp(r"(https?://[^\s'\"<>]+(?:mp4|m3u8)[^\s'\"<>]*)").firstMatch(html);
+  return alt?.group(1);
+}
+
+Future<String> fetchEpisodeStreamUrl(int episodeId) async {
+  final headers = {
+    ..._defaultHeaders,
+    "Referer": "$_baseHost/",
+  };
+
+  final embedResponse = await http.get(
+    Uri.parse("$_baseHost/embed-url/$episodeId"),
+    headers: headers,
   );
 
-  var data = elements[0].attributes['records'];
-  if (data == null || data.isEmpty) {
-    throw Exception("Missing records attribute");
+  if (embedResponse.statusCode < 200 || embedResponse.statusCode >= 300) {
+    throw Exception("HTTP ${embedResponse.statusCode} for embed-url");
   }
-  var json = jsonDecode(data);
-  return json;
+
+  final embedUrl = (embedResponse.headers["location"] ?? embedResponse.body).trim();
+  if (!embedUrl.startsWith("http")) {
+    throw Exception("Invalid embed url");
+  }
+
+  final pageResponse = await http.get(
+    Uri.parse(embedUrl),
+    headers: {
+      ...headers,
+      "Referer": "$_baseHost/embed-url/$episodeId",
+    },
+  );
+
+  if (pageResponse.statusCode < 200 || pageResponse.statusCode >= 300) {
+    throw Exception("HTTP ${pageResponse.statusCode} for embed page");
+  }
+
+  final url = _extractDownloadUrl(pageResponse.body);
+  if (url == null || url.isEmpty) {
+    throw Exception("No stream url found");
+  }
+
+  return url;
 }
 
 Future<List> toContinueAnime() {

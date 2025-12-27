@@ -22,7 +22,9 @@ class ChromeCastController(
     context: Context?
 ) : PlatformView, MethodChannel.MethodCallHandler, SessionManagerListener<Session>, PendingResult.StatusListener {
     private val channel = MethodChannel(messenger, "flutter_video_cast/chromeCast_$viewId")
-    private val chromeCastButton = MediaRouteButton(ContextThemeWrapper(context, R.style.ThemeOverlay_MediaRouter_Dark))
+    private val chromeCastButton = MediaRouteButton(
+        ContextThemeWrapper(context, androidx.mediarouter.R.style.ThemeOverlay_MediaRouter_Dark)
+    )
     private val sessionManager = CastContext.getSharedInstance()?.sessionManager
 
     init {

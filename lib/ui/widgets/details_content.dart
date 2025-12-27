@@ -26,6 +26,8 @@ class _DetailsContentState extends State<DetailsContent> {
 
   late LoadingThings controller;
   late ResumeController resumeController;
+  bool episodesLoading = true;
+  bool episodesError = false;
 
   int getRemaining(int index) {
     if (animeModel.episodes.containsKey(anime.episodes[index]['id'].toString())) {
@@ -68,7 +70,48 @@ class _DetailsContentState extends State<DetailsContent> {
       index_: getLatestIndex(),
     );
 
+    _loadAnimeData();
+
     super.initState();
+  }
+
+  Future<void> _loadAnimeData() async {
+    try {
+      final results = await searchAnime(title: anime.title);
+      if (results.isNotEmpty) {
+        final match = results.cast<Map>().firstWhere(
+              (item) => item["id"] == anime.id,
+              orElse: () => results.first,
+            );
+        anime.title = match["title"] ?? match["title_eng"] ?? match["title_it"] ?? anime.title;
+        anime.slug = match["slug"] ?? anime.slug;
+        anime.description = (match["plot"] ?? anime.description).toString();
+        anime.status = match["status"] ?? anime.status;
+        if (match["genres"] is List) {
+          anime.genres = match["genres"];
+        }
+        if (match["episodes_count"] is int) {
+          anime.episodesCount = match["episodes_count"];
+        }
+        if (match["imageurl"] is String) {
+          anime.imageUrl = match["imageurl"];
+        }
+      }
+
+      final episodes = await fetchAnimeEpisodes(anime.id);
+      anime.episodes = episodes;
+      setState(() {
+        episodesLoading = false;
+        episodesError = false;
+      });
+      resumeController.index.value = getLatestIndex();
+      controller.updateProgress();
+    } catch (e) {
+      setState(() {
+        episodesLoading = false;
+        episodesError = true;
+      });
+    }
   }
 
   @override
@@ -194,70 +237,79 @@ class _DetailsContentState extends State<DetailsContent> {
           child: SizedBox(
             width: double.infinity,
             child: Obx(
-              () => EpisodePlayer(
-                anime: anime,
-                controller: controller,
-                resumeController: resumeController,
-                resume: true,
-                borderRadius: 90,
-                height: 40,
-                child: Container(
-                  height: 40,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.secondaryContainer,
-                    borderRadius: BorderRadius.circular(90),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      controller.error.value
-                          ? Icon(
-                              Icons.error,
-                              color: Theme.of(context).colorScheme.onSecondaryContainer,
-                            )
-                          : controller.loading.value
-                              ? const SizedBox(
-                                  height: 18,
-                                  width: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2.5,
-                                  ),
-                                )
-                              : Icon(
-                                  Icons.play_arrow,
-                                  color: Theme.of(context).colorScheme.onSecondaryContainer,
-                                ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      Text(
-                        "Riprendi",
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSecondaryContainer,
+              () => episodesLoading
+                  ? const SizedBox(
+                      height: 40,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
                         ),
                       ),
-                    ],
-
-                    // child: ElevatedButton.icon(
-                    //   style: ButtonStyle(
-                    //     backgroundColor: MaterialStateProperty.all<Color>(
-                    //       Theme.of(context).colorScheme.secondaryContainer,
-                    //     ),
-                    //   ),
-                    //   onPressed: null,
-                    //   icon: Icon(
-                    //     Icons.play_arrow,
-                    //     color: Theme.of(context).colorScheme.onSecondaryContainer,
-                    //   ),
-                    //   label: Text(
-                    //     "Riprendi",
-                    //     style: TextStyle(
-                    //       color: Theme.of(context).colorScheme.onSecondaryContainer,
-                    //     ),
-                  ),
-                ),
-              ),
+                    )
+                  : episodesError
+                      ? Container(
+                          height: 40,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.errorContainer,
+                            borderRadius: BorderRadius.circular(90),
+                          ),
+                          child: Center(
+                            child: Text(
+                              "Errore nel caricamento degli episodi",
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onErrorContainer,
+                              ),
+                            ),
+                          ),
+                        )
+                      : EpisodePlayer(
+                          anime: anime,
+                          controller: controller,
+                          resumeController: resumeController,
+                          resume: true,
+                          borderRadius: 90,
+                          height: 40,
+                          child: Container(
+                            height: 40,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.secondaryContainer,
+                              borderRadius: BorderRadius.circular(90),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                controller.error.value
+                                    ? Icon(
+                                        Icons.error,
+                                        color: Theme.of(context).colorScheme.onSecondaryContainer,
+                                      )
+                                    : controller.loading.value
+                                        ? const SizedBox(
+                                            height: 18,
+                                            width: 18,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2.5,
+                                            ),
+                                          )
+                                        : Icon(
+                                            Icons.play_arrow,
+                                            color: Theme.of(context).colorScheme.onSecondaryContainer,
+                                          ),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                Text(
+                                  "Riprendi",
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
             ),
           ),
         ),
@@ -279,7 +331,9 @@ class _DetailsContentState extends State<DetailsContent> {
               );
             },
             child: Text(
-              "${anime.episodes.length} episodi disponibili",
+              episodesLoading
+                  ? "Caricamento episodi..."
+                  : "${anime.episodes.length} episodi disponibili",
               textAlign: TextAlign.left,
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onBackground,
@@ -290,23 +344,37 @@ class _DetailsContentState extends State<DetailsContent> {
           ),
         ),
         Expanded(
-          child: ListView.separated(
-            controller: _controller,
-            physics: const BouncingScrollPhysics(),
-            separatorBuilder: (context, index) => Divider(
-              color: Theme.of(context).colorScheme.background,
-              height: 6,
-              thickness: 0,
-            ),
-            itemCount: anime.episodes.length,
-            itemBuilder: (context, index) {
-              return EpisodeTile(
-                anime: anime,
-                index: index,
-                resumeController: resumeController,
-              );
-            },
-          ),
+          child: episodesLoading
+              ? const Center(
+                  child: CircularProgressIndicator(),
+                )
+              : episodesError
+                  ? Center(
+                      child: Text(
+                        "Impossibile caricare gli episodi",
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onBackground,
+                          fontSize: 16,
+                        ),
+                      ),
+                    )
+                  : ListView.separated(
+                      controller: _controller,
+                      physics: const BouncingScrollPhysics(),
+                      separatorBuilder: (context, index) => Divider(
+                        color: Theme.of(context).colorScheme.background,
+                        height: 6,
+                        thickness: 0,
+                      ),
+                      itemCount: anime.episodes.length,
+                      itemBuilder: (context, index) {
+                        return EpisodeTile(
+                          anime: anime,
+                          index: index,
+                          resumeController: resumeController,
+                        );
+                      },
+                    ),
         )
       ],
     );

@@ -253,18 +253,11 @@ public class FilePickerPlugin implements MethodChannel.MethodCallHandler, Flutte
             }
         });
         this.observer = new LifeCycleObserver(activity);
-        if (registrar != null) {
-            // V1 embedding setup for activity listeners.
-            application.registerActivityLifecycleCallbacks(this.observer);
-            registrar.addActivityResultListener(this.delegate);
-            registrar.addRequestPermissionsResultListener(this.delegate);
-        } else {
-            // V2 embedding setup for activity listeners.
-            activityBinding.addActivityResultListener(this.delegate);
-            activityBinding.addRequestPermissionsResultListener(this.delegate);
-            this.lifecycle = FlutterLifecycleAdapter.getActivityLifecycle(activityBinding);
-            this.lifecycle.addObserver(this.observer);
-        }
+        // V2 embedding setup for activity listeners.
+        activityBinding.addActivityResultListener(this.delegate);
+        activityBinding.addRequestPermissionsResultListener(this.delegate);
+        this.lifecycle = FlutterLifecycleAdapter.getActivityLifecycle(activityBinding);
+        this.lifecycle.addObserver(this.observer);
     }
 
     private void tearDown() {

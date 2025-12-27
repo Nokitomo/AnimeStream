@@ -41,42 +41,44 @@ class AnimeClass {
 }
 
 AnimeClass searchToObj(dynamic json) {
+  final episodes = json['episodes'];
+  final genres = json['genres'];
   return AnimeClass(
-      title: json['title'] ?? json['title_eng'],
-      imageUrl: json['imageurl'],
-      id: json['id'],
-      description: json['plot'], //archivio
-      episodes: json['episodes'],
-      status: json['status'],
-      genres: json['genres'],
+      title: json['title'] ?? json['title_eng'] ?? json['title_it'] ?? '',
+      imageUrl: json['imageurl'] ?? '',
+      id: json['id'] ?? 0,
+      description: (json['plot'] ?? '').toString(), //archivio
+      episodes: episodes is List ? episodes : [],
+      status: json['status'] ?? '',
+      genres: genres is List ? genres : [],
       episodesCount: json['episodes_count'] ?? 0,
-      slug: json['slug']);
+      slug: json['slug'] ?? '');
 }
 
 AnimeClass popularToObj(dynamic json) {
   return AnimeClass(
-      title: json['title'] ?? json['title_eng'],
-      imageUrl: json['imageurl'],
-      id: json['id'],
-      description: json['plot'], //popolari
+      title: json['title'] ?? json['title_eng'] ?? json['title_it'] ?? '',
+      imageUrl: json['imageurl'] ?? '',
+      id: json['id'] ?? 0,
+      description: (json['plot'] ?? '').toString(), //popolari
       episodes: [],
-      status: json['status'],
+      status: json['status'] ?? '',
       genres: [],
       episodesCount: json['episodes_count'] ?? 0,
-      slug: json['slug']);
+      slug: json['slug'] ?? '');
 }
 
 AnimeClass latestToObj(dynamic json) {
   return AnimeClass(
-      title: json["anime"]['title'] ?? json["anime"]['title_eng'],
-      imageUrl: json["anime"]['imageurl'],
-      id: json['anime']['id'],
-      description: json["anime"]['plot'], //ultimi usciti
-      episodes: [json['link']],
-      status: json["anime"]['status'],
+      title: json["anime"]['title'] ?? json["anime"]['title_eng'] ?? json["anime"]['title_it'] ?? '',
+      imageUrl: json["anime"]['imageurl'] ?? '',
+      id: json['anime']['id'] ?? 0,
+      description: (json["anime"]['plot'] ?? '').toString(), //ultimi usciti
+      episodes: [],
+      status: json["anime"]['status'] ?? '',
       genres: [],
       episodesCount: json["anime"]['episodes_count'] ?? 0,
-      slug: json["anime"]['slug']);
+      slug: json["anime"]['slug'] ?? '');
 }
 
 AnimeClass modelToObj(AnimeModel model) {
