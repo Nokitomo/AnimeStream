@@ -432,11 +432,9 @@ packages:
   flutter_video_cast:
     dependency: "direct main"
     description:
-      path: "."
-      ref: master
-      resolved-ref: b6de1cf923db6f2768d133712036fdb3f1eaa4ed
-      url: "https://github.com/daveshirman/flutter_video_cast.git"
-    source: git
+      path: "third_party/flutter_video_cast"
+      relative: true
+    source: path
     version: "1.0.3"
   flutter_web_plugins:
     dependency: transitive

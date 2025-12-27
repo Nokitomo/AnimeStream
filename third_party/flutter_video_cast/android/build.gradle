@@ -1,0 +1,49 @@
+group 'it.aesys.flutter_video_cast'
+version '1.0-SNAPSHOT'
+
+buildscript {
+    ext.kotlin_version = '1.5.30'
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.1.1'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+rootProject.allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+    namespace "it.aesys.flutter_video_cast"
+    compileSdkVersion 31
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+    defaultConfig {
+        minSdkVersion 16
+        targetSdkVersion 31
+    }
+    lintOptions {
+        disable 'InvalidPackage'
+    }
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
+    //ChromeCast dependencies
+    implementation 'com.google.android.gms:play-services-cast-framework:21.0.1'
+    implementation 'com.google.android.exoplayer:extension-cast:2.15.1'
+}

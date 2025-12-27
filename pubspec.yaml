@@ -60,6 +60,8 @@ dependency_overrides:
     path: ./third_party/auto_orientation
   flutter_meedu_videoplayer:
     path: ./third_party/flutter_meedu_videoplayer
+  flutter_video_cast:
+    path: ./third_party/flutter_video_cast
   video_player_avfoundation:
     git:
       url: https://github.com/vanlooverenkoen/flutter-packages/
