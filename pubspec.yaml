@@ -56,6 +56,10 @@ dependency_overrides:
   archive:
     path: ./third_party/archive
   fvp: 0.2.0
+  auto_orientation:
+    path: ./third_party/auto_orientation
+  flutter_meedu_videoplayer:
+    path: ./third_party/flutter_meedu_videoplayer
   video_player_avfoundation:
     git:
       url: https://github.com/vanlooverenkoen/flutter-packages/
