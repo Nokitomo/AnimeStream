@@ -62,6 +62,9 @@ dependency_overrides:
     path: ./third_party/flutter_meedu_videoplayer
   flutter_video_cast:
     path: ./third_party/flutter_video_cast
+  flutter_plugin_android_lifecycle: ^2.0.23
+  file_picker:
+    path: ./third_party/file_picker
   video_player_avfoundation:
     git:
       url: https://github.com/vanlooverenkoen/flutter-packages/
