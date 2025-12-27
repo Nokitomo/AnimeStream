@@ -151,46 +151,45 @@ Future<List> popularAnime() async {
 }
 
 Future<List> searchAnime({String title = ""}) async {
-  if (title.trim().isEmpty) {
-    return [];
-  }
-
+  final normalizedTitle = title.trim();
   final session = await _getAnimeunitySession();
   final headers = _buildSessionHeaders(session);
 
   final results = <dynamic>[];
   final ids = <int>{};
 
-  try {
-    final response = await http.post(
-      Uri.parse("$_baseHost/livesearch"),
-      headers: {
-        ...headers,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: {
-        "title": title,
-      },
-    );
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      final payload = jsonDecode(response.body);
-      if (payload is Map && payload["records"] is List) {
-        for (final record in payload["records"]) {
-          if (record is Map && record["id"] is int) {
-            if (ids.add(record["id"])) {
-              results.add(record);
+  if (normalizedTitle.isNotEmpty) {
+    try {
+      final response = await http.post(
+        Uri.parse("$_baseHost/livesearch"),
+        headers: {
+          ...headers,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: {
+          "title": normalizedTitle,
+        },
+      );
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        final payload = jsonDecode(response.body);
+        if (payload is Map && payload["records"] is List) {
+          for (final record in payload["records"]) {
+            if (record is Map && record["id"] is int) {
+              if (ids.add(record["id"])) {
+                results.add(record);
+              }
             }
           }
         }
       }
+    } catch (_) {
+      // Ignore to try the second search endpoint.
     }
-  } catch (_) {
-    // Ignore to try the second search endpoint.
   }
 
   try {
     final payload = {
-      "title": title,
+      "title": normalizedTitle,
       "type": false,
       "year": false,
       "order": false,
