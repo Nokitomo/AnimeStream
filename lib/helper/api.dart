@@ -277,7 +277,8 @@ String? _extractDownloadUrl(String html) {
   if (match != null) {
     return match.group(1);
   }
-  final alt = RegExp(r"(https?://[^\s'\"<>]+(?:mp4|m3u8)[^\s'\"<>]*)").firstMatch(html);
+  final alt = RegExp("(https?://[^\\s'\"<>]+(?:mp4|m3u8)[^\\s'\"<>]*)")
+      .firstMatch(html);
   return alt?.group(1);
 }
 

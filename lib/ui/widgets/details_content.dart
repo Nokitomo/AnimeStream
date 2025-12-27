@@ -30,6 +30,9 @@ class _DetailsContentState extends State<DetailsContent> {
   bool episodesError = false;
 
   int getRemaining(int index) {
+    if (anime.episodes.isEmpty || index < 0 || index >= anime.episodes.length) {
+      return -1;
+    }
     if (animeModel.episodes.containsKey(anime.episodes[index]['id'].toString())) {
       var currTime = animeModel.episodes[anime.episodes[index]['id'].toString()][0];
       var totTime = animeModel.episodes[anime.episodes[index]['id'].toString()][1];
@@ -41,6 +44,9 @@ class _DetailsContentState extends State<DetailsContent> {
   }
 
   int getLatestIndex() {
+    if (anime.episodes.isEmpty) {
+      return 0;
+    }
     int index = animeModel.lastSeenEpisodeIndex ?? 0;
     debugPrint("index prima: $index");
 
@@ -135,6 +141,10 @@ class _DetailsContentState extends State<DetailsContent> {
                   child: CachedNetworkImage(
                     height: 170,
                     imageUrl: anime.imageUrl,
+                    errorWidget: (context, url, error) => const Icon(
+                      Icons.warning_amber_rounded,
+                      size: 35,
+                    ),
                   ),
                 ),
               ),
@@ -236,34 +246,34 @@ class _DetailsContentState extends State<DetailsContent> {
           padding: const EdgeInsets.all(0),
           child: SizedBox(
             width: double.infinity,
-            child: Obx(
-              () => episodesLoading
-                  ? const SizedBox(
-                      height: 40,
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                        ),
+            child: episodesLoading
+                ? const SizedBox(
+                    height: 40,
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
                       ),
-                    )
-                  : episodesError
-                      ? Container(
-                          height: 40,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.errorContainer,
-                            borderRadius: BorderRadius.circular(90),
-                          ),
-                          child: Center(
-                            child: Text(
-                              "Errore nel caricamento degli episodi",
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.onErrorContainer,
-                              ),
+                    ),
+                  )
+                : episodesError
+                    ? Container(
+                        height: 40,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.errorContainer,
+                          borderRadius: BorderRadius.circular(90),
+                        ),
+                        child: Center(
+                          child: Text(
+                            "Errore nel caricamento degli episodi",
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onErrorContainer,
                             ),
                           ),
-                        )
-                      : EpisodePlayer(
+                        ),
+                      )
+                    : Obx(
+                        () => EpisodePlayer(
                           anime: anime,
                           controller: controller,
                           resumeController: resumeController,
@@ -310,7 +320,7 @@ class _DetailsContentState extends State<DetailsContent> {
                             ),
                           ),
                         ),
-            ),
+                      ),
           ),
         ),
         Padding(

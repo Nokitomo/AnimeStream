@@ -96,6 +96,10 @@ class LoadingPageForAnimeState extends State<LoadingPageForAnime> {
                               child: CachedNetworkImage(
                                 imageUrl: widget.animeObj.imageUrl,
                                 height: 280,
+                                errorWidget: (context, url, error) => const Icon(
+                                  Icons.warning_amber_rounded,
+                                  size: 35,
+                                ),
                               ),
                             ),
                             Padding(

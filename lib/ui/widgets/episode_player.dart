@@ -1,5 +1,6 @@
 import 'package:animestream/helper/api.dart';
 import 'package:animestream/ui/widgets/details_content.dart';
+import 'package:animestream/ui/widgets/details_content_fragments/episode_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:animestream/ui/widgets/player.dart';
 import 'package:get/get.dart';
