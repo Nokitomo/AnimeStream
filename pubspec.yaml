@@ -71,6 +71,8 @@ dependency_overrides:
       ref: feature/#60048-ios-picture-in-picture
       path: packages/video_player/video_player
 
+  url_launcher_ios: ^6.3.1
+
 flutter_launcher_icons:
   android: true
   ios: true
