@@ -53,6 +53,9 @@ dependencies:
       ref: master
 
 dependency_overrides:
+  archive:
+    path: ./third_party/archive
+  fvp: 0.2.0
   video_player_avfoundation:
     git:
       url: https://github.com/vanlooverenkoen/flutter-packages/
@@ -72,6 +75,8 @@ dependency_overrides:
       path: packages/video_player/video_player
 
   url_launcher_ios: ^6.3.1
+  win32:
+    path: ./third_party/win32
 
 flutter_launcher_icons:
   android: true
